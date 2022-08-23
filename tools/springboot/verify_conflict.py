@@ -31,14 +31,19 @@ def _check_for_duplicate_classes(class_path_to_jar_paths, whitelisted_jars):
                         digest,
                     )
                 )
-                if previous_digest is not None:
-                    if previous_digest != digest:
-                        if (
+                if (
+                    previous_digest is not None
+                    and previous_digest != digest
+                    and (
+                        (
                             os.path.basename(jar_path) not in whitelisted_jars
-                            or os.path.basename(previous_jar_path) not in whitelisted_jars
-                        ):
-                            all_hash_digests_match = False
-                            found_duplicates = True
+                            or os.path.basename(previous_jar_path)
+                            not in whitelisted_jars
+                        )
+                    )
+                ):
+                    all_hash_digests_match = False
+                    found_duplicates = True
                 previous_digest = digest
                 previous_jar_path = jar_path
             if not all_hash_digests_match:
@@ -84,7 +89,7 @@ def _parse_classes_index_file(filename):
                     # W-5899212
                     continue
                 if current_jar_path is None:
-                    raise Exception("Jar not found for class " + class_path)
+                    raise Exception(f"Jar not found for class {class_path}")
                 else:
                     class_path_to_jar_paths[class_path].append(current_jar_path)
 
@@ -113,8 +118,9 @@ def _parse_whitelisted_jars_file(whitelist_file):
 def run(classes_index_file_path, whitelisted_jar_path):
     whitelisted_jars = _parse_whitelisted_jars_file(whitelisted_jar_path)
     class_path_to_jar_paths = _parse_classes_index_file(classes_index_file_path)
-    found_duplicates = _check_for_duplicate_classes(class_path_to_jar_paths, whitelisted_jars)
-    if found_duplicates:
+    if found_duplicates := _check_for_duplicate_classes(
+        class_path_to_jar_paths, whitelisted_jars
+    ):
         raise Exception("Found duplicate classes in the packaged springboot jar")
 
 
