@@ -22,14 +22,12 @@ def run():
 
     for section in soup.find_all("section"):
         for li in section.find_all("li"):
-            maybe_title = li.find_all("h3")
-            if maybe_title:
+            if maybe_title := li.find_all("h3"):
                 title = maybe_title[0].text
             else:
                 continue
 
-            maybe_author = li.find_all(attrs={"itemprop": "author"})
-            if maybe_author:
+            if maybe_author := li.find_all(attrs={"itemprop": "author"}):
                 author = maybe_author[0].text.replace("by ", "")
             else:
                 continue

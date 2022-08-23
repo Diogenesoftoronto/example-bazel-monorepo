@@ -28,7 +28,7 @@ class TestVerifyConflict(unittest.TestCase):
             "MyClass2.class", "classes", "com/salesforce", FAKE_CONT2
         )
         jar_file = self._create_jar("myjar.jar", classes_dir)
-        self._run("jar tf %s" % jar_file)
+        self._run(f"jar tf {jar_file}")
 
         index_file_path = self._write_index_file([jar_file])
         verify_conflict.run(index_file_path, WHITELIST_PATH)
@@ -82,7 +82,7 @@ class TestVerifyConflict(unittest.TestCase):
 
     def _create_jar(self, name, classes_dir):
         jar_file = os.path.join(self.tempdir, name)
-        self._run("jar cf %s %s" % (jar_file, "."), cwd=classes_dir)
+        self._run(f"jar cf {jar_file} .", cwd=classes_dir)
         assert os.path.exists(jar_file)
         return jar_file
 
@@ -102,7 +102,7 @@ class TestVerifyConflict(unittest.TestCase):
         with open(index_file_path, "wb") as f:
             for jar_file in jar_files:
                 f.write(("%s%s\n" % (verify_conflict.JARNAME_PREFIX, jar_file)).encode())
-                f.write(self._run("unzip -l %s" % jar_file))
+                f.write(self._run(f"unzip -l {jar_file}"))
         return index_file_path
 
     def _write_whitelist_file(self):
@@ -115,8 +115,9 @@ class TestVerifyConflict(unittest.TestCase):
     def _run(self, cmd, cwd=None):
         if not cwd:
             cwd = self.tempdir
-        output = subprocess.Popen(cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE).stdout.read()
-        return output
+        return subprocess.Popen(
+            cmd, cwd=cwd, shell=True, stdout=subprocess.PIPE
+        ).stdout.read()
 
 
 if __name__ == "__main__":
